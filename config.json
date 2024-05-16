@@ -1,0 +1,20 @@
+{
+    "module": "keras_nlp.src.models.gemma.gemma_backbone",
+    "class_name": "GemmaBackbone",
+    "config": {
+        "name": "gemma_backbone",
+        "trainable": true,
+        "vocabulary_size": 256000,
+        "num_layers": 18,
+        "num_query_heads": 8,
+        "num_key_value_heads": 1,
+        "hidden_dim": 2048,
+        "intermediate_dim": 32768,
+        "head_dim": 256,
+        "layer_norm_epsilon": 1e-06,
+        "dropout": 0
+    },
+    "registered_name": "keras_nlp>GemmaBackbone",
+    "assets": [],
+    "weights": "model.weights.h5"
+}

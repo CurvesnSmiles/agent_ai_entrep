@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}
+    Login
+{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+{% endblock %}
+{% block content %}
+
+    <section class="container forms">
+        <div class="form login">
+            <div class="form-content">
+                <header>Login</header>
+                <form method="POST" action="{{ url_for('login') }}">
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p class="'error">{{ message }}</p >
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                    <div class="field input-field">
+                        <input type="email" placeholder="Email" class="input" name="email">
+                    </div>
+
+                    <div class="field input-field">
+                        <input type="password" placeholder="Password" class="input" name="password">
+                        <i class='bx bx-hide eye-icon'></i>
+                    </div>
+
+                    <div class="form-link">
+                        <a href="#" class="forgot-pass">Forgot password?</a>
+                    </div>
+
+                    <div class="field button-field">
+                        <button type="submit">Login</button>
+                    </div>
+                </form>
+
+                <div class="form-link">
+                    <span>Don't have an account? <a href="{{ url_for('register') }}" class="link signup-link">Signup</a></span>
+                </div>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="media-options">
+                <a href="#" class="field google">
+                    <img src="{{ url_for('static', filename='image/google.png') }}" alt="" class="google-img">
+                    <span> Login with Google</span>
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
