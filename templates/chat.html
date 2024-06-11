@@ -8,65 +8,162 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
 {% endblock %}
 {% block content %}
-        
-    <div class="container">
+
+<div class="container">
+    <br>
+    <div class="header">
         <br>
-        <div class="header">
-            <br>
-            <h1>Agent AI For Entrepreonership In Tunisia</h1>
-        
-            <div class="dark-mode-toggle">
-                <input type="checkbox" id="dark-mode-switch">
-                <label for="dark-mode-switch" class="dark-mode-label">
-                    <i class="fas fa-moon"></i>
-                    <i class="fas fa-sun"></i>
-                    <div class="ball"></div>
-                </label>
-            </div>
-        </div>
+        <h1>Agent AI For Entrepreneurship In Tunisia</h1>
 
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <br>
-            <h1 class="sdb">{{ username }}</h1> 
-            <a href="{{url_for('new_conversation')}}" class="disconect" >New Conversation</a>
-            
-            <hr>
-            <h5>Conversation List</h5>
-            
-            <hr>
-            <div class="old-conversation">
-
-            </div>
-            <!-- Logout button -->
-            <br>
-            
-            <a href="{{ url_for('logout') }}" class="disconect" >Lougout </a>
-            
-        </div>
-        
-        <div class="chat-container">
-            <br>
-            <hr>
-            <br>
-            <button id="toggle-sidebar" >
-                <i class="fas fa-bars"></i>
-            </button>
-            <div id="chat-log" class="chat-log">
-
-            </div> <!-- Ajout de la classe "chat-log" -->
-        </div>
-
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Send a message.">
-            <button id="send-button">
-                <i class="fa-solid fa-paper-plane" id="button-icon"></i>
-            </button>
+        <div class="dark-mode-toggle">
+            <input type="checkbox" id="dark-mode-switch">
+            <label for="dark-mode-switch" class="dark-mode-label">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+                <div class="ball"></div>
+            </label>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <br>
+        <h1 class="sdb">{{ username }}</h1> 
+        <a href="{{ url_for('new_conversation') }}" class="disconect">New Conversation</a>
+        
+        <hr>
+        <h5>Conversation List</h5>
+        
+        <hr>
+        <div class="old-conversation">
+            <ul>
+                {% for conversation in conversations %}
+                
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Logout button -->
+        <br>
+        
+        <a href="{{ url_for('logout') }}" class="disconect">Logout</a>
+        
+    </div>
+    
+    <div class="chat-container">
+        <br>
+        <hr>
+        <br>
+        <button id="toggle-sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div id="chat-log" class="chat-log">
+            
+        </div>
+    </div>
 
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <div class="input-container">
+        <input type="text" id="user-input" placeholder="Send a message.">
+        <button id="send-button">
+            <i class="fa-solid fa-paper-plane" id="button-icon"></i>
+        </button>
+    </div>
+</div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+    var conversationId = "{{ conversation_id }}";
+
+    $(document).ready(function() {
+        function sendMessage() {
+            var userInput = $('#user-input').val();
+            if (userInput.trim() !== '') {
+                // Append user message to chat log
+                $('#chat-log').append('<div class="chat-message"><strong>{{ username }}:</strong><br> ' + userInput + '<br><br></div>');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/generate_response',
+                    data: { user_input: userInput, conversation_id: conversationId },
+                    success: function(response) {
+                        // Create a new element for the bot message
+                        var botMessageElement = $('<div class="chat-message"><strong>Bot:</strong><br> <span class="typing"></span><br></div>');
+                        $('#chat-log').append(botMessageElement);
+
+                        // Apply the typing effect to the bot message
+                        typeEffect(response.message, botMessageElement.find('.typing')[0], function() {
+                            // Scroll to the bottom of the chat log after the typing effect is complete
+                            $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                        });
+
+                        // Save bot response to the database
+                        saveMessage(userInput, response.message);
+                    },
+                    error: function(error) {
+                        $('#chat-log').append('<div class="chat-message"><strong>Error:</strong> ' + error.responseText + '</div>');
+                        // Scroll to the bottom of the chat log
+                        $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                    }
+                });
+
+                // Clear the input field
+                $('#user-input').val('');
+            }
+        }
+
+        function saveMessage(userMessage, botMessage) {
+            $.ajax({
+                type: 'POST',
+                url: '/save_message',
+                data: { user_message: userMessage, bot_message: botMessage, conversation_id: conversationId },
+                success: function(response) {
+                    console.log('Messages saved successfully');
+                },
+                error: function(error) {
+                    console.error('Error saving messages:', error);
+                }
+            });
+        }
+
+        // Send button click event
+        $('#send-button').click(function() {
+            sendMessage();
+        });
+
+        // Enter key press event
+        $('#user-input').keypress(function(event) {
+            if (event.which == 13) { // 13 is the keycode for Enter key
+                event.preventDefault(); // Prevent the default action of the Enter key
+                sendMessage();
+            }
+        });
+    });
+
+    function typeEffect(text, element, callback) {
+        let index = 0;
+        const typingSpeed = 10; // Typing speed in milliseconds
+
+        function type() {
+            if (index < text.length) {
+                element.textContent += text.charAt(index);
+                index++;
+                setTimeout(type, typingSpeed);
+            } else {
+                element.classList.remove('typing');
+                // Call the callback function once typing effect is complete
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            }
+        }
+
+        type();
+    }
+    
+</script>
+<script>
+
+</script>
 {% endblock %}
