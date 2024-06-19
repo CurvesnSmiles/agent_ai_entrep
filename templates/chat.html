@@ -9,21 +9,11 @@
 {% endblock %}
 {% block content %}
 
-<div class="container">
-    <br>
-    <div class="header">
-        <br>
-        <h1>Agent AI For Entrepreneurship In Tunisia</h1>
 
-        <div class="dark-mode-toggle">
-            <input type="checkbox" id="dark-mode-switch">
-            <label for="dark-mode-switch" class="dark-mode-label">
-                <i class="fas fa-moon"></i>
-                <i class="fas fa-sun"></i>
-                <div class="ball"></div>
-            </label>
-        </div>
-    </div>
+<div class="header">
+    <h1>Agent AI For Entrepreneurship In Tunisia</h1>
+</div>
+<div class="container">
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -38,9 +28,14 @@
         <div class="old-conversation">
             <ul>
                 {% for conversation in conversations %}
-                
+                    <li>
+                        <a href="{{ url_for('chat', conversation_id=conversation.id) }}">
+                            {{ conversation.title }} 
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
+        
         </div>
         
         <!-- Logout button -->
@@ -48,17 +43,29 @@
         
         <a href="{{ url_for('logout') }}" class="disconect">Logout</a>
         
+        <div class="dark-mode-toggle">
+            <input type="checkbox" id="dark-mode-switch">
+            <label for="dark-mode-switch" class="dark-mode-label">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+                <div class="ball"></div>
+            </label>
+        </div>
+        
     </div>
     
     <div class="chat-container">
-        <br>
-        <hr>
-        <br>
+        
         <button id="toggle-sidebar">
             <i class="fas fa-bars"></i>
         </button>
         <div id="chat-log" class="chat-log">
-            
+            {% for message in messages %}
+                <div class="chat-message">
+                    <strong>{% if message.is_user_message %}{{ username }}{% else %}Bot{% endif %}:</strong><br>
+                    {{ message.content }}<br><br>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
